@@ -20,6 +20,7 @@ public class Vehiculo extends JPanel implements Serializable {
     private double tiempoCarrera;
     private boolean carreraTerminada;
     private int velocidad;
+    private boolean preparado;
     private int posicionX;
     private PropertyChangeSupport changeSupport;
 
@@ -43,6 +44,7 @@ public class Vehiculo extends JPanel implements Serializable {
         this.posicionX =0;
         this.posicionY=0;
         this.ejecuciones=0;
+        this.preparado=false;
         CargarImagenDesdeArchivo();
 
 
@@ -79,6 +81,14 @@ public class Vehiculo extends JPanel implements Serializable {
         changeSupport.firePropertyChange("posicionX",viejaPosicionX,nuevaPosicionX);
     }
 
+    public boolean isPreparado() {
+        return preparado;
+    }
+
+    public void setPreparado(boolean preparado) {
+        this.preparado = preparado;
+    }
+
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         changeSupport.addPropertyChangeListener(listener);
     }
@@ -108,8 +118,10 @@ public class Vehiculo extends JPanel implements Serializable {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setImageUrl(String nuevaimageUrl) {
+        String viejaImagenUrl=this.imageUrl;
+        this.imageUrl=nuevaimageUrl;
+        changeSupport.firePropertyChange("imagenUrl",viejaImagenUrl,nuevaimageUrl);
     }
 
     public int getAlto() {
