@@ -17,7 +17,7 @@ public class VehiculoPropertyChangeListener implements PropertyChangeListener {
         if(propertyName.equals("imagenUrl")){
             vehiculo=(Vehiculo) evt.getSource();
             if(!oldValue.equals(newValue)){
-                System.out.println("Estoy aqui");
+
                 vehiculo.setPreparado(true);
             }
         }

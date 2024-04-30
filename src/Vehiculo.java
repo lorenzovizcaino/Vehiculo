@@ -184,6 +184,16 @@ public class Vehiculo extends JPanel implements Serializable {
 
     public void IniciarPosicion(int x, int y){
         setBounds(x,y,ancho,alto);
+        setPreparado(false);
+        //setImageUrl("image/nave.png");
+        File file = new File(getImageUrl());
+        try {
+            image = ImageIO.read(file).getScaledInstance(ancho,alto,Image.SCALE_SMOOTH);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        setImagenSeleccionada(image);
+
     }
 
     public void Parar(){
