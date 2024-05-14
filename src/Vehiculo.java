@@ -6,12 +6,15 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class Vehiculo extends JPanel implements Serializable {
+
     private static int id=0;
+
 
     private String imageUrl;
     private int alto;
@@ -27,17 +30,21 @@ public class Vehiculo extends JPanel implements Serializable {
 
     private int posicionY;
     private int ejecuciones;
+    private static int idGanadora=0;
 
     private Image image;
     private Timer timer;
     private TimerTask task;
 
 
+
+
     public Vehiculo() {
+        id++;
         this.imageUrl="image/nave.png";
         this.alto=100;
         this.ancho=200;
-        this.indice=id+1;
+        this.indice=id;
         this.carreraTerminada=false;
         this.velocidad=0;
         changeSupport = new PropertyChangeSupport(this);
@@ -46,6 +53,8 @@ public class Vehiculo extends JPanel implements Serializable {
         this.ejecuciones=0;
         this.preparado=false;
         CargarImagenDesdeArchivo();
+
+
 
 
 
@@ -59,12 +68,12 @@ public class Vehiculo extends JPanel implements Serializable {
         this.changeSupport = changeSupport;
     }
 
-    public static int getId() {
-        return id;
+    public static int getIdGanadora() {
+        return idGanadora;
     }
 
-    public static void setId(int id) {
-        Vehiculo.id = id;
+    public static void setIdGanadora(int idGanadora) {
+        Vehiculo.idGanadora = idGanadora;
     }
 
     public void setTiempoCarrera(double tiempoCarrera) {
@@ -153,7 +162,9 @@ public class Vehiculo extends JPanel implements Serializable {
     }
 
     public void setCarreraTerminada(boolean carreraTerminada) {
+        boolean viejaCarreraTerminada=this.carreraTerminada;
         this.carreraTerminada = carreraTerminada;
+        changeSupport.firePropertyChange("carreraTerminada",viejaCarreraTerminada,carreraTerminada);
     }
 
     public int getVelocidad() {
@@ -173,19 +184,57 @@ public class Vehiculo extends JPanel implements Serializable {
     }
 
     public void AcelerarFrenar(int anchoPanel){
-        Parar();
+        PararParaReanudar();
         Arrancar(posicionX,posicionY,anchoPanel,true);
     }
 
     public void ReanudarMarcha(int anchoPanel){
-       // System.out.println("POS X: "+ x);
+
         Arrancar(posicionX,posicionY,anchoPanel,false);
+    }
+
+    public void MarchaAtras(int xInicio){
+        PararParaReanudar();
+        timer = new Timer();
+
+
+
+        // Crear una referencia final a 'this' de toda la clase, esto es necesario para poder actualizar el atributo x del movimiento,
+        // si ello en la clase interna 'TimerTask' no nos deja acceder a x.
+        final Vehiculo referenciaThis = this;
+
+        task = new TimerTask() {
+
+            @Override
+            public void run() {
+                referenciaThis.ejecuciones++;
+                if ((referenciaThis.posicionX + velocidad) < xInicio) {
+                    Parar();
+                } else {
+                    setBounds((referenciaThis.posicionX + velocidad), referenciaThis.posicionY, ancho, alto);
+                    referenciaThis.posicionX -= velocidad;
+
+                }
+
+                tiempoCarrera= referenciaThis.ejecuciones * 50;
+
+
+
+            }
+
+
+
+
+        };
+
+
+        timer.schedule(task, 0, 50);
     }
 
     public void IniciarPosicion(int x, int y){
         setBounds(x,y,ancho,alto);
         setPreparado(false);
-        //setImageUrl("image/nave.png");
+
         File file = new File(getImageUrl());
         try {
             image = ImageIO.read(file).getScaledInstance(ancho,alto,Image.SCALE_SMOOTH);
@@ -200,6 +249,14 @@ public class Vehiculo extends JPanel implements Serializable {
         task.cancel();
         setCarreraTerminada(true);
     }
+
+    public void PararParaReanudar(){
+        task.cancel();
+
+    }
+
+
+
 
     public void Arrancar(int x, int y, int anchoPanel, boolean cambiarVelocidad){
         this.posicionX = x;
@@ -231,7 +288,7 @@ public class Vehiculo extends JPanel implements Serializable {
                 tiempoCarrera= referenciaThis.ejecuciones * 50;
 
 
-                //System.out.println("TiempoCarrera: "+tiempoCarrera);
+
             }
 
 
@@ -245,40 +302,7 @@ public class Vehiculo extends JPanel implements Serializable {
 
 
 
-//    public void Arrancar(int x, int y, int anchoPanel){
-//        this.x=x;
-//        this.y=y;
-//
-//        final int[] x2 = {x};
-//        timer=new Timer();
-//        Random random=new Random();
-//        velocidad=random.nextInt(50)+5;
-//        task=new TimerTask() {
-//            int ejecuciones=0;
-//
-//
-//            @Override
-//            public void run() {
-//                ejecuciones++;
-//                if((x2[0] + velocidad)>anchoPanel-250){
-//                    Parar();
-//                }else{
-//                    setBounds((x2[0] + velocidad),y,ancho,alto);
-//                    x2[0] +=velocidad;
-//
-//                }
-//
-//
-//
-//
-//                tiempoCarrera=ejecuciones*50;
-//            }
-//
-//        };
-//
-//        timer.schedule(task,0,50);
-//
-//    }
+
 
 
     @Override
@@ -293,7 +317,6 @@ public class Vehiculo extends JPanel implements Serializable {
 
     private void CargarImagenDesdeArchivo() {
         try {
-            id++;
             // Cargar la imagen desde la ruta local
             File file = new File(imageUrl);
             image = ImageIO.read(file).getScaledInstance(ancho,alto,Image.SCALE_SMOOTH);
@@ -322,13 +345,10 @@ public class Vehiculo extends JPanel implements Serializable {
 
     }
 
-//    @Override
-//    public Dimension getPreferredSize() {
-//        // Establecer el tamaño preferido del panel al tamaño de la imagen
-//        if (image != null) {
-//            return new Dimension(image.getWidth(), image.getHeight());
-//        }
-//        return super.getPreferredSize();
-//    }
+    public void mostrarMensajeFinCarrera() {
+        JOptionPane.showMessageDialog(null,"El ganador es el vehiculo numero: "+getIdGanadora()+", pulsar el boton VER TIEMPOS Y APUESTAS");
+    }
+
+
 
 }
