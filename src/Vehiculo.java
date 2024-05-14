@@ -346,7 +346,7 @@ public class Vehiculo extends JPanel implements Serializable {
     }
 
     public void mostrarMensajeFinCarrera() {
-        JOptionPane.showMessageDialog(null,"El ganador es el vehiculo numero: "+getIdGanadora()+", pulsar el boton VER TIEMPOS Y APUESTAS");
+        JOptionPane.showMessageDialog(null,"El ganador es el vehiculo numero: "+getIdGanadora()+", pulsar el boton MOSTRAR TIEMPOS Y APUESTAS");
     }
 
 
